@@ -138,7 +138,7 @@ export default function OrderPage({ fuels: liveFuels, onNavigate }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#07090E] text-white flex flex-col justify-start md:justify-center items-center p-2 sm:p-4 md:p-8 font-sans">
+    <div className="min-h-screen bg-[#07090E] text-white flex flex-col justify-start md:justify-center items-center p-2 pb-28 sm:p-4 md:p-8 font-sans">
 
       {/* ── KIOSK SCREEN HARDWARE WRAPPER ── */}
       <div
@@ -407,14 +407,14 @@ export default function OrderPage({ fuels: liveFuels, onNavigate }) {
                         )}
                       </AnimatePresence>
 
-                      <div className="mt-auto pt-8 flex items-end justify-between border-t border-gray-800/50">
+                      <div className="mt-auto pt-6 md:pt-8 flex flex-col sm:flex-row items-start sm:items-end justify-between border-t border-gray-800/50 gap-2 sm:gap-4">
                         <div>
-                          <p className="text-sm font-bold text-gray-500 mb-1">สรุปคำสั่งซื้อ</p>
-                          <p className="text-xl font-bold text-white">{selectedFuel.name} — {calculatedLiters.toFixed(2)} ลิตร</p>
+                          <p className="text-xs md:text-sm font-bold text-gray-500 mb-0 md:mb-1">สรุปคำสั่งซื้อ</p>
+                          <p className="text-lg md:text-xl font-bold text-white">{selectedFuel.name} — {calculatedLiters.toFixed(2)} ลิตร</p>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm font-bold text-gray-500 mb-1">ยอดรวมชำระ</p>
-                          <p className="text-4xl font-black" style={{ color: selectedFuel.color }}>฿{calculatedBaht.toFixed(2)}</p>
+                        <div className="text-left sm:text-right w-full sm:w-auto">
+                          <p className="hidden sm:block text-xs md:text-sm font-bold text-gray-500 mb-1">ยอดรวมชำระ</p>
+                          <p className="text-3xl md:text-4xl font-black" style={{ color: selectedFuel.color }}>฿{calculatedBaht.toFixed(2)}</p>
                         </div>
                       </div>
 
