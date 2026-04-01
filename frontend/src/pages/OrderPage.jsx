@@ -446,7 +446,7 @@ export default function OrderPage({ fuels: liveFuels, onNavigate }) {
                 {isDispensing && (
                   <motion.div
                     initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    className="fixed md:absolute inset-0 bg-[#05070a]/90 backdrop-blur-xl z-50 flex flex-col items-center justify-center md:rounded-r-3xl border-0 md:border md:border-gray-800 p-4 text-center"
+                    className="fixed md:absolute inset-0 bg-[#05070a]/90 backdrop-blur-xl z-[60] flex flex-col items-center justify-center md:rounded-r-3xl border-0 md:border md:border-gray-800 p-4 text-center"
                   >
                     <motion.div
                       initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
@@ -512,66 +512,66 @@ export default function OrderPage({ fuels: liveFuels, onNavigate }) {
                 {showSlip && (
                   <motion.div
                     initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    className="fixed md:absolute inset-0 bg-[#05070a]/80 backdrop-blur-md z-40 flex items-center justify-center p-4 md:rounded-r-3xl"
+                    className="fixed md:absolute inset-0 bg-[#05070a]/80 backdrop-blur-md z-[60] flex items-center justify-center p-4 md:rounded-r-3xl"
                   >
                     <motion.div
                       initial={{ scale: 0.95, y: 20, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.95, y: 20, opacity: 0 }}
-                      className="bg-[#f8fafc] rounded-2xl w-full max-w-md shadow-2xl overflow-hidden relative border border-gray-200"
+                      className="bg-[#f8fafc] rounded-2xl w-full max-w-md max-h-[90vh] shadow-2xl overflow-hidden relative border border-gray-200 flex flex-col"
                     >
-                      <div className="bg-white p-6 text-center border-b-[3px] border-dashed border-gray-300 relative">
+                      <div className="bg-white p-5 md:p-6 text-center border-b-[3px] border-dashed border-gray-300 relative shrink-0">
                         <div className="absolute -bottom-3 -left-3 w-6 h-6 bg-[#05070a]/80 backdrop-blur-md rounded-full border-r-[3px] border-t-[3px] border-dashed border-gray-300 rotate-45 hidden md:block" />
                         <div className="absolute -bottom-3 -right-3 w-6 h-6 bg-[#05070a]/80 backdrop-blur-md rounded-full border-l-[3px] border-t-[3px] border-dashed border-gray-300 -rotate-45 hidden md:block" />
 
-                        <div className="w-14 h-14 bg-gradient-to-tr from-gray-900 to-gray-700 text-white rounded-full flex items-center justify-center text-2xl mx-auto mb-4 shadow-xl">🧾</div>
-                        <h2 className="text-2xl font-black text-gray-900 tracking-tight">ตรวจสอบคำสั่งซื้อ</h2>
-                        <p className="text-sm text-gray-500 font-medium mt-1">โปรดตรวจสอบรายละเอียดก่อนกดยืนยัน</p>
+                        <div className="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-tr from-gray-900 to-gray-700 text-white rounded-full flex items-center justify-center text-xl md:text-2xl mx-auto mb-2 md:mb-4 shadow-xl">🧾</div>
+                        <h2 className="text-xl md:text-2xl font-black text-gray-900 tracking-tight">ตรวจสอบคำสั่งซื้อ</h2>
+                        <p className="text-xs md:text-sm text-gray-500 font-medium mt-1">โปรดตรวจสอบรายละเอียดก่อนกดยืนยัน</p>
                       </div>
 
-                      <div className="p-6 md:p-8 space-y-4 font-mono text-sm md:text-base text-gray-700 bg-[#f8fafc]">
-                        <div className="flex justify-between border-b border-gray-200/60 pb-3">
+                      <div className="p-5 md:p-8 space-y-3 md:space-y-4 font-mono text-sm md:text-base text-gray-700 bg-[#f8fafc] overflow-y-auto hidden-scrollbar flex-1">
+                        <div className="flex justify-between border-b border-gray-200/60 pb-2 md:pb-3">
                           <span className="text-gray-500 font-sans">ประเภทน้ำมัน</span>
                           <span className="font-bold flex items-center gap-2">
-                            <span className="w-3 h-3 rounded-full shadow-inner" style={{ background: selectedFuel?.color }}></span>
+                            <span className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full shadow-inner" style={{ background: selectedFuel?.color }}></span>
                             {selectedFuel?.name}
                           </span>
                         </div>
-                        <div className="flex justify-between border-b border-gray-200/60 pb-3">
+                        <div className="flex justify-between border-b border-gray-200/60 pb-2 md:pb-3">
                           <span className="text-gray-500 font-sans">รูปแบบบริการ</span>
                           <span className="font-bold text-gray-900">{deliveryMode === 'delivery' ? '🛵 เดลิเวอรี่' : '⛽ เติมที่สถานี'}</span>
                         </div>
-                        <div className="flex justify-between border-b border-gray-200/60 pb-3">
+                        <div className="flex justify-between border-b border-gray-200/60 pb-2 md:pb-3">
                           <span className="text-gray-500 font-sans">ปริมาณ (L)</span>
                           <span className="font-bold text-gray-900">{calculatedLiters.toFixed(2)} ลิตร</span>
                         </div>
-                        <div className="flex justify-between border-b border-gray-200/60 pb-3">
+                        <div className="flex justify-between border-b border-gray-200/60 pb-2 md:pb-3">
                           <span className="text-gray-500 font-sans">ราคาต่อลิตร</span>
                           <span className="font-bold text-gray-900">฿{selectedFuel?.price.toFixed(2)}</span>
                         </div>
 
                         {deliveryMode === 'delivery' && (
-                          <div className="border-b border-gray-200/60 pb-3">
-                            <span className="text-gray-500 font-sans block mb-2">พิกัดจัดส่ง</span>
-                            <span className="font-semibold text-xs leading-relaxed block break-words bg-white border border-gray-200 p-3 rounded-xl shadow-sm">{location}</span>
-                            {note && <span className="text-xs text-gray-600 mt-2 block px-1 font-sans"><span className="font-bold">หมายเหตุ:</span> {note}</span>}
+                          <div className="border-b border-gray-200/60 pb-2 md:pb-3">
+                            <span className="text-gray-500 font-sans block mb-1 md:mb-2">พิกัดจัดส่ง</span>
+                            <span className="font-semibold text-[11px] md:text-xs leading-relaxed block break-words bg-white border border-gray-200 p-2 md:p-3 rounded-lg md:rounded-xl shadow-sm">{location}</span>
+                            {note && <span className="text-[11px] md:text-xs text-gray-600 mt-1 md:mt-2 block px-1 font-sans"><span className="font-bold">หมายเหตุ:</span> {note}</span>}
                           </div>
                         )}
 
-                        <div className="flex justify-between items-end pt-3">
-                          <span className="text-gray-500 font-bold font-sans">ยอดรวมชำระ</span>
-                          <span className="text-4xl font-black text-[#dc2626] tracking-tighter">฿{calculatedBaht.toFixed(2)}</span>
+                        <div className="flex flex-col sm:flex-row justify-between sm:items-end pt-2 md:pt-3 gap-1 md:gap-0">
+                          <span className="text-gray-500 font-bold font-sans text-xs md:text-sm">ยอดรวมชำระ</span>
+                          <span className="text-3xl md:text-4xl font-black text-[#dc2626] tracking-tighter text-right">฿{calculatedBaht.toFixed(2)}</span>
                         </div>
                       </div>
 
-                      <div className="p-5 bg-white flex gap-3 border-t border-gray-200">
+                      <div className="p-4 md:p-5 bg-white flex flex-row gap-2 md:gap-3 border-t border-gray-200 shrink-0">
                         <button
                           onClick={() => setShowSlip(false)}
-                          className="flex-1 py-3.5 bg-gray-50 border border-gray-300 rounded-xl font-bold text-gray-600 hover:bg-gray-100 transition-colors shadow-sm"
+                          className="flex-1 py-3 md:py-3.5 bg-gray-50 border border-gray-300 rounded-lg md:rounded-xl font-bold text-gray-600 hover:bg-gray-100 transition-colors shadow-sm text-sm md:text-base"
                         >
                           แก้ไข
                         </button>
                         <button
                           onClick={() => { setShowSlip(false); setIsDispensing(true); }}
-                          className="flex-[2] py-3.5 bg-gradient-to-r from-[#dc2626] to-[#b91c1c] text-white rounded-xl font-black text-lg hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-red-500/30"
+                          className="flex-[2] py-3 md:py-3.5 bg-gradient-to-r from-[#dc2626] to-[#b91c1c] text-white rounded-lg md:rounded-xl font-black text-sm md:text-lg hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-red-500/30"
                         >
                           ยืนยัน สั่งซื้อเลย
                         </button>
