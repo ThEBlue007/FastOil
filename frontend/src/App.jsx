@@ -23,9 +23,8 @@ function App() {
     const fetchKapookPrices = async () => {
       try {
         const url = encodeURIComponent('https://gasprice.kapook.com/gasprice.php');
-        const res = await fetch(`https://api.allorigins.win/get?url=${url}`);
-        const data = await res.json();
-        const html = data.contents;
+        const res = await fetch(`https://api.codetabs.com/v1/proxy?quest=${url}`);
+        const html = await res.text();
 
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
