@@ -6,11 +6,11 @@ import HistoryPage from './pages/HistoryPage'
 import SupportPage from './pages/SupportPage'
 
 const DEFAULT_FUELS = [
-  { id: 'g91', name: 'แก๊สโซฮอล์ 91', price: 35.94, tomorrow: 35.94, change: 0, color: '#16a34a' },
-  { id: 'g95', name: 'แก๊สโซฮอล์ 95', price: 38.44, tomorrow: 38.44, change: 0, color: '#dc2626' },
-  { id: 'e20', name: 'E20', price: 33.34, tomorrow: 33.34, change: 0, color: '#d97706' },
-  { id: 'e85', name: 'E85', price: 28.66, tomorrow: 28.66, change: 0, color: '#059669' },
-  { id: 'b7', name: 'ดีเซล B7', price: 29.94, tomorrow: 29.94, change: 0, color: '#ea580c' },
+  { id: 'g91', name: 'แก๊สโซฮอล์ 91', price: 99.99, tomorrow: 35.94, change: 0, color: '#16a34a' },
+  { id: 'g95', name: 'แก๊สโซฮอล์ 95', price: 99.99, tomorrow: 38.44, change: 0, color: '#dc2626' },
+  { id: 'e20', name: 'แก๊สโซฮอล์ E20', price: 99.99, tomorrow: 33.34, change: 0, color: '#d97706' },
+  { id: 'e85', name: 'แก๊สโซฮอล์ E85', price: 99.99, tomorrow: 28.66, change: 0, color: '#059669' },
+  { id: 'b7', name: 'ดีเซล B7', price: 99.99, tomorrow: 29.94, change: 0, color: '#ea580c' },
 ]
 
 function App() {
@@ -46,11 +46,11 @@ function App() {
           return match ? parseFloat(match[1]) : null;
         };
 
-        const g91 = getPrice('แก๊สโซฮอล์\\s*91') || 35.94;
-        const g95 = getPrice('แก๊สโซฮอล์\\s*95') || 38.44;
-        const e20 = getPrice('E20') || 33.34;
-        const e85 = getPrice('E85') || 28.66;
-        const d7 = getPrice('ดีเซล') || 29.94;
+        const g91 = getPrice('แก๊สโซฮอล์\\s*91') || 99.99;
+        const g95 = getPrice('แก๊สโซฮอล์\\s*95') || 99.99;
+        const e20 = getPrice('แก๊สโซฮอล์\\s*E20') || 99.99;
+        const e85 = getPrice('แก๊สโซฮอล์\\s*E85') || 99.99;
+        const d7 = getPrice('ดีเซล\\s*B7') || 99.99;
 
         const hasTomorrowChange = html.includes('พรุ่งนี้') || html.includes('ปรับราคา');
         let changeStatus = 0;
@@ -60,9 +60,9 @@ function App() {
         setFuels([
           { id: 'g91', name: 'แก๊สโซฮอล์ 91', price: g91, tomorrow: g91 + changeStatus, change: changeStatus, color: '#019B91' },
           { id: 'g95', name: 'แก๊สโซฮอล์ 95', price: g95, tomorrow: g95 + changeStatus, change: changeStatus, color: '#0078B7' },
-          { id: 'e20', name: 'E20', price: e20, tomorrow: e20 + changeStatus, change: changeStatus, color: '#F2572B' },
-          { id: 'e85', name: 'E85', price: e85, tomorrow: e85 + changeStatus, change: changeStatus, color: '#CC2129' },
-          { id: 'b7', name: 'ดีเซล B7', price: d7, tomorrow: d7 + (html.includes('ปรับขึ้น ดีเซล') ? 0.5 : 0), change: (html.includes('ปรับขึ้น ดีเซล') ? 0.5 : 0), color: '#282C69' },
+          { id: 'e20', name: 'แก๊สโซฮอล์ E20', price: e20, tomorrow: e20 + changeStatus, change: changeStatus, color: '#F2572B' },
+          { id: 'e85', name: 'แก๊สโซฮอล์ E85', price: e85, tomorrow: e85 + changeStatus, change: changeStatus, color: '#CC2129' },
+          { id: 'b7', name: 'ดีเซล B7', price: d7, tomorrow: d7 + (html.includes('ปรับขึ้น ดีเซล B7') ? 0.5 : 0), change: (html.includes('ปรับขึ้น ดีเซล B7') ? 0.5 : 0), color: '#282C69' },
         ]);
 
         setLastUpdate(new Date().toLocaleDateString('th-TH', {

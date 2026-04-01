@@ -25,7 +25,7 @@ const FUELS = [
   },
   {
     id: 'e20',
-    label: 'E20',
+    label: 'แก๊สโซฮอล์E20',
     shortLabel: 'E20',
     color: '#f59e0b',
     bg: 'rgba(245,158,11,0.12)',
@@ -36,7 +36,7 @@ const FUELS = [
   },
   {
     id: 'e85',
-    label: 'E85',
+    label: 'แก๊สโซฮอล์ E85',
     shortLabel: 'E85',
     color: '#10b981',
     bg: 'rgba(16,185,129,0.12)',
