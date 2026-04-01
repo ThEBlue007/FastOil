@@ -10,7 +10,7 @@ const DEFAULT_FUELS = [
   { id: 'g95', name: 'แก๊สโซฮอล์ 95', price: 99.99, tomorrow: 38.44, change: 0, color: '#dc2626' },
   { id: 'e20', name: 'แก๊สโซฮอล์ E20', price: 99.99, tomorrow: 33.34, change: 0, color: '#d97706' },
   { id: 'e85', name: 'แก๊สโซฮอล์ E85', price: 99.99, tomorrow: 28.66, change: 0, color: '#059669' },
-  { id: 'b7', name: 'ดีเซล B7', price: 99.99, tomorrow: 29.94, change: 0, color: '#ea580c' },
+  { id: 'b7', name: 'ดีเซล', price: 99.99, tomorrow: 29.94, change: 0, color: '#ea580c' },
 ]
 
 function App() {
@@ -49,7 +49,7 @@ function App() {
         const g95 = getPrice('แก๊สโซฮอล์\\s*95') || 99.99;
         const e20 = getPrice('แก๊สโซฮอล์\\s*E20') || 99.99;
         const e85 = getPrice('แก๊สโซฮอล์\\s*E85') || 99.99;
-        const d7 = getPrice('ดีเซล\\s*B7') || 99.99;
+        const d7 = getPrice('ดีเซล(?:\\s*B7)?(?!\\s*พรีเมียม)') || 99.99;
 
         const hasTomorrowChange = html.includes('พรุ่งนี้') || html.includes('ปรับราคา');
         let changeStatus = 0;
@@ -61,7 +61,7 @@ function App() {
           { id: 'g95', name: 'แก๊สโซฮอล์ 95', price: g95, tomorrow: g95 + changeStatus, change: changeStatus, color: '#0078B7' },
           { id: 'e20', name: 'แก๊สโซฮอล์ E20', price: e20, tomorrow: e20 + changeStatus, change: changeStatus, color: '#F2572B' },
           { id: 'e85', name: 'แก๊สโซฮอล์ E85', price: e85, tomorrow: e85 + changeStatus, change: changeStatus, color: '#CC2129' },
-          { id: 'b7', name: 'ดีเซล B7', price: d7, tomorrow: d7 + (html.includes('ปรับขึ้น ดีเซล B7') ? 0.5 : 0), change: (html.includes('ปรับขึ้น ดีเซล B7') ? 0.5 : 0), color: '#282C69' },
+          { id: 'b7', name: 'ดีเซล', price: d7, tomorrow: d7 + (html.includes('ปรับขึ้น ดีเซล') ? 0.5 : 0), change: (html.includes('ปรับขึ้น ดีเซล') ? 0.5 : 0), color: '#282C69' },
         ]);
 
         setLastUpdate(new Date().toLocaleDateString('th-TH', {
