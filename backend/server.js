@@ -14,9 +14,16 @@ const PORT = process.env.PORT || 3001
 
 app.set('trust proxy', 1)
 
-// ⚡ Health Check (Top level - เพื่อให้ Render ตรวจเจอได้รวดเร็วที่สุด)
-app.get('/', (req, res) => res.send('🚀 FastOil API is online!'))
-app.get('/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }))
+// 🔍 Log ทุก request ที่เข้ามา (เพื่อดูว่า Render ส่งหน่วยตรวจมาจริงไหม)
+app.use((req, res, next) => {
+  console.log(`🔍 [${new Date().toISOString()}] ${req.method} ${req.url} - UserAgent: ${req.get('user-agent')}`)
+  next()
+})
+
+// ⚡ Health Check (Top level - ตอบกลับเร็วที่สุดและเรียบง่ายที่สุด)
+app.get('/', (req, res) => res.send('ok'))
+app.get('/health', (req, res) => res.send('ok'))
+app.get('/healthz', (req, res) => res.send('ok'))
 
 // ── Security Middleware ────────────────────────────────────────────────────────
 app.use(helmet())
