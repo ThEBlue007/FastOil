@@ -60,6 +60,16 @@ function start() {
     console.log(`🚀 FastOil API is online & listening on port ${PORT}`)
     console.log(`📊 Environment: ${process.env.NODE_ENV || 'production'}`)
     
+    // Check required environment variables
+    const requiredEnv = ['TURSO_DATABASE_URL', 'TURSO_AUTH_TOKEN', 'JWT_SECRET', 'JWT_REFRESH_SECRET']
+    requiredEnv.forEach(key => {
+      if (!process.env[key]) {
+        console.error(`⚠️ CRITICAL Warning: ${key} is NOT found in environment variables!`)
+      } else {
+        console.log(`✅ ${key} is set.`)
+      }
+    })
+
     try {
       console.log('⏳ Initializing database...')
       await initDb()

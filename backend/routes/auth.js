@@ -10,8 +10,15 @@ const { authenticate } = require('../middleware/auth')
 const router = express.Router()
 
 function generateTokens(userId) {
-  const accessToken = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '1h' })
-  const refreshToken = jwt.sign({ userId }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' })
+  const secret = process.env.JWT_SECRET || 'fallback_secret_for_emergency'
+  const refreshSecret = process.env.JWT_REFRESH_SECRET || 'fallback_refresh_secret'
+  
+  if (!process.env.JWT_SECRET) {
+    console.error('❌ CRITICAL ERROR: JWT_SECRET is missing! Logging in might fail.')
+  }
+
+  const accessToken = jwt.sign({ userId }, secret, { expiresIn: '1h' })
+  const refreshToken = jwt.sign({ userId }, refreshSecret, { expiresIn: '7d' })
   return { accessToken, refreshToken }
 }
 

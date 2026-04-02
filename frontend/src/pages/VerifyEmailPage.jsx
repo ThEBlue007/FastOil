@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { useLocation, useNavigate, Navigate } from 'react-router-dom'
+import { useLocation, useNavigate, Navigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { api } from '../utils/api'
 import { useAuth } from '../context/AuthContext'
@@ -85,11 +85,26 @@ export default function VerifyEmailPage() {
       
       navigate('/dashboard', { replace: true })
     } catch (err) {
-      setError(err.message)
+      console.error('Verification error:', err)
+      setError(err.message || 'เกิดข้อผิดพลาดในการยืนยันรหัส')
     } finally {
       setLoading(false)
     }
   }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#1e3a8a]/5 via-white to-[#dc2626]/5 flex items-center justify-center p-4">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="max-w-md w-full space-y-8 glass-card p-10 rounded-3xl relative z-10"
+        style={{ boxShadow: '0 20px 50px rgba(30,58,138,0.10), 0 4px 10px rgba(0,0,0,0.04)' }}
+      >
+        <div className="absolute top-6 left-6 z-20">
+          <Link to="/" className="flex items-center gap-2 text-gray-500 hover:text-[#dc2626] font-semibold bg-white/80 px-4 py-2 rounded-full shadow-sm border border-gray-100 transition-all hover:shadow-md">
+            <span>←</span> กลับหน้าหลัก
+          </Link>
+        </div>
 
   const handleResend = async () => {
     if (resendCooldown > 0) return
