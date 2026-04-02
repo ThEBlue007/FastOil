@@ -455,24 +455,24 @@ export default function AdminPanel() {
                   )}
 
                   {/* Bulk Actions for Users */}
-                  {activeTab === 'users' && selectedUsers.length > 0 && (
-                    <div className="bg-[#dc2626] p-4 rounded-2xl text-white flex justify-between items-center shadow-lg animate-bounce-short">
-                      <span className="font-black text-sm">เลือกคุรุไว้ {selectedUsers.length} ท่าน</span>
-                      <button onClick={handleBulkDeleteUsers} className="bg-white text-red-600 px-6 py-2 rounded-xl font-black text-xs uppercase tracking-widest shadow-xl">ถอนรายชื่อทั้งหมด</button>
-                    </div>
-                  )}
+                    {selectedUsers.length > 0 && (
+                      <div className="bg-[#dc2626] p-4 rounded-2xl text-white flex justify-between items-center shadow-lg animate-bounce-short">
+                        <span className="font-black text-sm">เลือกสมาชิกไว้ {selectedUsers.length} รายการ</span>
+                        <button onClick={handleBulkDeleteUsers} className="bg-white text-red-600 px-6 py-2 rounded-xl font-black text-xs uppercase tracking-widest shadow-xl">ลบที่เลือกทั้งหมด</button>
+                      </div>
+                    )}
 
                   <div className="glass-card rounded-[2.5rem] shadow-sm overflow-hidden p-2 sm:p-4">
                     {/* Desktop Table View */}
                     <div className="hidden md:block overflow-x-auto">
                       <table className="w-full text-left">
-                        <thead className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] border-b border-gray-50">
+                        <thead className="text-xs font-black text-gray-500 uppercase tracking-widest border-b border-gray-100">
                           <tr>
                             {activeTab === 'users' && <th className="px-6 py-8 w-12"><input type="checkbox" onChange={handleSelectAllUsers} checked={filteredUsers.length > 0 && selectedUsers.length === filteredUsers.length} className="w-5 h-5 rounded-lg text-[#dc2626] outline-none" /></th>}
-                            <th className="px-6 py-8">{activeTab === 'users' ? 'สมาชิก' : 'รหัสคำสั่งซื้อ'}</th>
-                            <th className="px-6 py-8">{activeTab === 'users' ? 'ติดต่อ' : 'ข้อมูล'}</th>
-                            <th className="px-6 py-8 text-center">สถานะ</th>
-                            <th className="px-6 py-8">จัดการระดับ</th>
+                            <th className="px-6 py-8">{activeTab === 'users' ? 'รายชื่อสมาชิก' : 'รหัสคำสั่งซื้อ'}</th>
+                            <th className="px-6 py-8">{activeTab === 'users' ? 'ข้อมูลติดต่อ' : 'รายละเอียด'}</th>
+                            <th className="px-6 py-8 text-center">สถานะปัจจุบัน</th>
+                            <th className="px-6 py-8">ระดับสิทธิ์</th>
                             <th className="px-6 py-8 text-right">ดำเนินการ</th>
                           </tr>
                         </thead>
@@ -480,28 +480,52 @@ export default function AdminPanel() {
                           {activeTab === 'users' ? filteredUsers.map(u => (
                             <tr key={u.id} className={`transition-all ${selectedUsers.includes(u.id) ? 'bg-red-50/40' : 'hover:bg-gray-50/50'}`}>
                               <td className="px-6 py-8"><input type="checkbox" checked={selectedUsers.includes(u.id)} onChange={() => toggleSelectUser(u.id)} className="w-5 h-5 rounded-lg text-[#dc2626] outline-none" /></td>
-                              <td className="px-6 py-8 flex items-center gap-4"><div className="w-12 h-12 bg-gradient-to-br from-[#dc2626] to-[#fbbf24] rounded-2xl flex items-center justify-center text-white font-black text-sm shadow-md">{u.name.substring(0, 1).toUpperCase()}</div><span className="font-black text-sm">{u.name}</span></td>
-                              <td className="px-6 py-8 text-xs font-bold text-gray-500">{u.email}</td>
-                              <td className="px-6 py-8 text-center"><span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${u.is_banned ? 'bg-red-100 text-red-600' : 'bg-blue-50 text-blue-600'}`}>{u.is_banned ? 'BANNED' : 'ACTIVE'}</span></td>
-                              <td className="px-6 py-8"><select value={u.role} onChange={e => handleRoleChange(u.id, e.target.value)} className="bg-gray-50 p-2.5 rounded-xl text-[10px] font-black outline-none uppercase border-none ring-1 ring-gray-100 cursor-pointer">{['user', 'admin'].map(r => (<option key={r} value={r}>{r}</option>))}</select></td>
+                              <td className="px-6 py-8 flex items-center gap-4">
+                                <div className="w-12 h-12 bg-gradient-to-br from-[#dc2626] to-[#fbbf24] rounded-2xl flex items-center justify-center text-white font-black text-lg shadow-md flex-shrink-0">{u.name.substring(0, 1).toUpperCase()}</div>
+                                <span className="font-black text-base text-gray-900">{u.name}</span>
+                              </td>
+                              <td className="px-6 py-8 text-sm font-bold text-gray-500">{u.email}</td>
+                              <td className="px-6 py-8 text-center">
+                                <span className={`px-4 py-1.5 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest ${u.is_banned ? 'bg-red-100 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
+                                  {u.is_banned ? 'BANNED' : 'ACTIVE'}
+                                </span>
+                              </td>
+                              <td className="px-6 py-8">
+                                <select value={u.role} onChange={e => handleRoleChange(u.id, e.target.value)} className="bg-gray-50 p-2.5 rounded-xl text-xs font-black outline-none uppercase border-none ring-1 ring-gray-100 cursor-pointer hover:bg-white transition-all">
+                                  {['user', 'admin'].map(r => (<option key={r} value={r}>{r.toUpperCase()}</option>))}
+                                </select>
+                              </td>
                               <td className="px-6 py-8 text-right space-x-2">
-                                <button onClick={() => handleBanUser(u.id, !u.is_banned)} className="p-2.5 bg-orange-50 text-orange-600 rounded-xl hover:bg-orange-600 hover:text-white transition-all text-[10px]">⚖️</button>
-                                <button onClick={() => handleDeleteSingleUser(u.id)} className="p-2.5 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all text-[10px]">🗑️</button>
+                                <button onClick={() => handleBanUser(u.id, !u.is_banned)} title={u.is_banned ? "ปลดแบน" : "ระงับการใช้งาน"} className="group relative p-3 bg-orange-50 text-orange-600 rounded-xl hover:bg-orange-600 hover:text-white transition-all text-sm shadow-sm">
+                                  ⚖️
+                                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none font-bold z-10 transition-all">
+                                    {u.is_banned ? 'ปลดแบน' : 'ระงับไอดี'}
+                                  </span>
+                                </button>
+                                <button onClick={() => handleDeleteSingleUser(u.id)} title="ลบบัญชีถาวร" className="group relative p-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all text-sm shadow-sm">
+                                  🗑️
+                                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-red-900 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none font-bold z-10 transition-all">
+                                    ลบบัญชี
+                                  </span>
+                                </button>
                               </td>
                             </tr>
                           )) : filteredOrders.map(o => (
                             <tr key={o.id} className="hover:bg-gray-50/50 transition-all group">
-                              <td className="px-6 py-8 font-black text-[10px] text-gray-300 group-hover:text-[#dc2626] transition-colors">#{o.id.substring(0, 8).toUpperCase()}</td>
-                              <td className="px-6 py-8"><p className="font-black text-sm text-gray-800">{o.user_name}</p><p className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mt-1">{o.fuel_type} • {o.liters}L</p></td>
-                              <td className="px-6 py-8 text-center"><span className="text-sm font-black text-[#dc2626] tabular-nums">฿{o.total_price.toLocaleString()}</span></td>
+                              <td className="px-6 py-8 font-black text-xs text-gray-400 group-hover:text-[#dc2626] transition-colors">#{o.id.substring(0, 8).toUpperCase()}</td>
                               <td className="px-6 py-8">
-                                <select value={o.status} onChange={e => handleUpdateStatus(o.id, e.target.value)} className="bg-gray-50/50 px-4 py-2 rounded-xl text-[10px] font-black outline-none border-none uppercase shadow-sm cursor-pointer hover:bg-white transition-all ring-1 ring-gray-100">
+                                <p className="font-black text-base text-gray-900">{o.user_name}</p>
+                                <p className="text-[11px] font-bold text-gray-400 tracking-widest uppercase mt-1">{o.fuel_type} • {o.liters}L</p>
+                              </td>
+                              <td className="px-6 py-8 text-center"><span className="text-base font-black text-[#dc2626] tabular-nums">฿{o.total_price.toLocaleString()}</span></td>
+                              <td className="px-6 py-8">
+                                <select value={o.status} onChange={e => handleUpdateStatus(o.id, e.target.value)} className="bg-gray-50/50 px-4 py-2.5 rounded-xl text-xs font-black outline-none border-none uppercase shadow-sm cursor-pointer hover:bg-white transition-all ring-1 ring-gray-100">
                                   {Object.entries(STATUS_TH).map(([val, label]) => (<option key={val} value={val}>{label}</option>))}
                                 </select>
                               </td>
                               <td className="px-6 py-8 text-right space-x-2">
-                                <button onClick={() => setSelectedOrder(o)} className="text-[10px] font-black text-blue-600 bg-blue-50 px-5 py-3 rounded-xl hover:bg-blue-600 hover:text-white transition-all uppercase tracking-widest shadow-sm">ดูข้อมูล</button>
-                                <button onClick={() => handleDeleteOrder(o.id)} className="text-[10px] font-black text-red-500 bg-red-100 px-5 py-3 rounded-xl hover:bg-red-600 hover:text-white transition-all uppercase tracking-widest shadow-sm">ลบ</button>
+                                <button onClick={() => setSelectedOrder(o)} className="text-xs font-black text-blue-600 bg-blue-50 px-5 py-3.5 rounded-xl hover:bg-blue-600 hover:text-white transition-all uppercase tracking-widest shadow-sm">ดูข้อมูล</button>
+                                <button onClick={() => handleDeleteOrder(o.id)} className="text-xs font-black text-red-500 bg-red-100 px-5 py-3.5 rounded-xl hover:bg-red-600 hover:text-white transition-all uppercase tracking-widest shadow-sm">ลบ</button>
                               </td>
                             </tr>
                           ))}
