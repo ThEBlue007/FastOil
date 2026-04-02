@@ -12,6 +12,12 @@ const adminRoutes = require('./routes/admin')
 const app = express()
 const PORT = process.env.PORT || 3001
 
+app.set('trust proxy', 1)
+
+// ⚡ Health Check (Top level - เพื่อให้ Render ตรวจเจอได้รวดเร็วที่สุด)
+app.get('/', (req, res) => res.send('🚀 FastOil API is online!'))
+app.get('/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }))
+
 // ── Security Middleware ────────────────────────────────────────────────────────
 app.use(helmet())
 app.use(cors({
@@ -25,22 +31,10 @@ app.use(cors({
 app.use(express.json({ limit: '10kb' }))
 app.use(generalLimiter)
 
-// Trust proxy for rate limiting behind Render/Heroku
-app.set('trust proxy', 1)
-
-// ── Health Check ───────────────────────────────────────────────────────────────
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() })
-})
-
 // ── API Routes ─────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRoutes)
 app.use('/api/orders', ordersRoutes)
 app.use('/api/admin', adminRoutes)
-
-// ── Health Check ───────────────────────────────────────────────────────────────
-app.get('/', (req, res) => res.send('🚀 FastOil API is online!'))
-app.get('/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }))
 
 // ── 404 Handler ────────────────────────────────────────────────────────────────
 app.use((req, res) => {
