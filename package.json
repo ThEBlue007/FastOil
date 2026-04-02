@@ -1,4 +1,19 @@
 {
+  "name": "fastoil-platform",
+  "version": "1.0.0",
+  "description": "FastOil Fullstack Platform",
+  "main": "backend/server.js",
+  "scripts": {
+    "install:backend": "cd backend && npm install",
+    "install:frontend": "cd frontend && npm install",
+    "build": "cd frontend && npm install --include=dev && npm run build",
+    "start": "cd backend && node server.js",
+    "render-build": "npm run build && npm run install:backend",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.2",
     "gh-pages": "^6.3.0",
