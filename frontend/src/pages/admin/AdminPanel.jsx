@@ -279,7 +279,7 @@ export default function AdminPanel() {
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 h-16 sm:h-20 flex items-center px-4 sm:px-8 shadow-sm">
         <div className="max-w-7xl mx-auto w-full flex justify-between items-center">
           <Link to="/" className="flex items-center gap-3">
-            <img src="/logo.png" alt="FastOil Logo" className="h-8 sm:h-10 w-auto object-contain" />
+            <img src="/logo.png" alt="FastOil Logo" className="h-10 md:h-12 w-auto object-contain" />
           </Link>
 
           {/* Desktop Navigation Tab */}
@@ -569,13 +569,18 @@ export default function AdminPanel() {
                                <span className="text-[10px] font-bold text-gray-400 uppercase">{o.liters}L</span>
                             </div>
                             <div className="flex gap-2">
-                               <div className="flex-1">
-                                  <select value={o.status} onChange={e => handleUpdateStatus(o.id, e.target.value)} className="w-full bg-gray-50 border-none p-3 rounded-2xl text-[10px] font-black uppercase tracking-widest text-center shadow-inner">
-                                    {Object.entries(STATUS_TH).map(([val, label]) => (<option key={val} value={val}>{label}</option>))}
-                                  </select>
-                               </div>
-                               <button onClick={() => setSelectedOrder(o)} className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center font-bold text-lg shadow-sm">ℹ️</button>
-                               <button onClick={() => handleDeleteOrder(o.id)} className="w-12 h-12 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center font-bold text-lg shadow-sm">🗑️</button>
+                               <button 
+                                 onClick={() => setSelectedOrder(o)} 
+                                 className="flex-1 bg-blue-50 text-blue-600 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-sm active:bg-blue-100 transition-all"
+                               >
+                                 ดูข้อมูล
+                               </button>
+                               <button 
+                                 onClick={() => handleDeleteOrder(o.id)} 
+                                 className="flex-[0.5] bg-red-50 text-red-600 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-sm active:bg-red-100 transition-all font-display"
+                               >
+                                 ลบ
+                               </button>
                             </div>
                          </div>
                        ))}

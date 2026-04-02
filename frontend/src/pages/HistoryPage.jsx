@@ -39,8 +39,7 @@ export default function HistoryPage({ onTrack }) {
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 h-16 md:h-20 flex items-center px-4 md:px-8 mb-8">
         <div className="max-w-4xl mx-auto w-full flex justify-between items-center">
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-[#dc2626] rounded-xl flex items-center justify-center text-white font-black text-xs">F</div>
-            <div className="flex font-black text-xl italic tracking-tighter text-red-500">Fast<span className="text-amber-500">Oil</span></div>
+            <img src="/logo.png" alt="FastOil Logo" className="h-10 md:h-12 w-auto object-contain" />
           </Link>
           <button onClick={() => navigate('/order')} className="text-sm font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-1">
             <span>+</span> สั่งน้ำมันเพิ่ม
