@@ -48,17 +48,20 @@ app.use((err, req, res, next) => {
 })
 
 // ── Start Server ───────────────────────────────────────────────────────────────
-async function start() {
-  try {
-    await initDb()
-    app.listen(PORT, () => {
-      console.log(`🚀 FastOil API running on port ${PORT}`)
-      console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`)
-    })
-  } catch (err) {
-    console.error('Failed to start server:', err)
-    process.exit(1)
-  }
+function start() {
+  app.listen(PORT, '0.0.0.0', async () => {
+    console.log(`🚀 FastOil API is online & listening on port ${PORT}`)
+    console.log(`📊 Environment: ${process.env.NODE_ENV || 'production'}`)
+    
+    try {
+      console.log('⏳ Initializing database...')
+      await initDb()
+      console.log('✅ Database connected & ready!')
+    } catch (err) {
+      console.error('❌ Failed to initialize database:', err)
+      // Keep server running so we can see the logs, but API will fail
+    }
+  })
 }
 
 start()
