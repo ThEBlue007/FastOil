@@ -59,9 +59,10 @@ export default function VerifyEmailPage() {
     })
     setCode(newCode)
     
-    // Focus last filled input or very last input
     const focusIndex = Math.min(pastedData.length, 5)
-    inputsRef.current[focusIndex].focus()
+    if (inputsRef.current[focusIndex]) {
+      inputsRef.current[focusIndex].focus()
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -76,19 +77,30 @@ export default function VerifyEmailPage() {
 
     try {
       const data = await api.verifyEmail({ userId, code: otpString })
-      // Auto login user after verify successfully
       localStorage.setItem('fastoil_token', data.accessToken)
       localStorage.setItem('fastoil_refresh', data.refreshToken)
-      
-      // Update context state immediately
       setUser(data.user)
-      
       navigate('/dashboard', { replace: true })
     } catch (err) {
       console.error('Verification error:', err)
       setError(err.message || 'เกิดข้อผิดพลาดในการยืนยันรหัส')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleResend = async () => {
+    if (resendCooldown > 0) return
+    setError('')
+    try {
+      const data = await api.resendEmailOtp({ userId })
+      if (data.otp) {
+        alert(`[MOCK OTP] รหัสยืนยันอีเมลใหม่ของคุณคือ: ${data.otp}`)
+      }
+      setResendCooldown(60)
+      setCode(['', '', '', '', '', ''])
+    } catch (err) {
+      setError(err.message)
     }
   }
 
@@ -100,45 +112,32 @@ export default function VerifyEmailPage() {
         className="max-w-md w-full space-y-8 glass-card p-10 rounded-3xl relative z-10"
         style={{ boxShadow: '0 20px 50px rgba(30,58,138,0.10), 0 4px 10px rgba(0,0,0,0.04)' }}
       >
+        {/* Back Button */}
         <div className="absolute top-6 left-6 z-20">
           <Link to="/" className="flex items-center gap-2 text-gray-500 hover:text-[#dc2626] font-semibold bg-white/80 px-4 py-2 rounded-full shadow-sm border border-gray-100 transition-all hover:shadow-md">
             <span>←</span> กลับหน้าหลัก
           </Link>
         </div>
 
-  const handleResend = async () => {
-    if (resendCooldown > 0) return
-    setError('')
-    try {
-      const data = await api.resendEmailOtp({ userId })
-      if (data.otp) {
-        alert(`[MOCK OTP] รหัสยืนยันอีเมลใหม่ของคุณคือ: ${data.otp}`)
-      }
-      setResendCooldown(60)
-      setCode(['', '', '', '', '', '']) // reset fields
-    } catch (err) {
-      setError(err.message)
-    }
-  }
-
-  return (
-    <div className="min-h-screen py-12 px-4 flex items-center justify-center bg-[#f8fafc]">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-        className="max-w-md w-full glass-card p-10 rounded-3xl text-center"
-      >
-        <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl">
-          ✉️
+        {/* Header */}
+        <div className="text-center mt-6">
+          <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl">
+            ✉️
+          </div>
+          <h2 className="text-2xl font-black text-[#1e3a8a] mb-2">ยืนยันอีเมลของคุณ</h2>
+          <p className="text-gray-500 mb-8 text-sm">
+            เราได้ส่งรหัส OTP 6 หลักไปที่<br />
+            <strong className="text-gray-800">{email}</strong>
+          </p>
         </div>
-        
-        <h2 className="text-2xl font-black text-[#1e3a8a] mb-2">ยืนยันอีเมลของคุณ</h2>
-        <p className="text-gray-500 mb-8 text-sm">
-          เราได้ส่งรหัส OTP 6 หลักไปที่<br />
-          <strong className="text-gray-800">{email}</strong>
-        </p>
 
+        {/* Form */}
         <form onSubmit={handleSubmit}>
-          {error && <div className="text-red-500 text-sm mb-4 bg-red-50 p-3 rounded-lg border border-red-100">{error}</div>}
+          {error && (
+            <div className="text-red-500 text-sm mb-4 bg-red-50 p-3 rounded-lg border border-red-100">
+              {error}
+            </div>
+          )}
 
           <div className="flex justify-between gap-2 mb-8" onPaste={handlePaste}>
             {code.map((digit, i) => (
@@ -158,15 +157,22 @@ export default function VerifyEmailPage() {
           </div>
 
           <motion.button
-            whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-            type="submit" disabled={loading}
+            whileHover={{ scale: 1.02 }} 
+            whileTap={{ scale: 0.98 }}
+            type="submit" 
+            disabled={loading}
             className="w-full bg-[#1e3a8a] text-white py-3.5 rounded-xl font-bold mb-4 flex justify-center shadow-lg hover:bg-blue-900 transition-colors"
           >
-            {loading ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'ยืนยันรหัส'}
+            {loading ? (
+              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              'ยืนยันรหัส'
+            )}
           </motion.button>
         </form>
 
-        <div className="text-sm text-gray-500 mt-6">
+        {/* Resend Section */}
+        <div className="text-sm text-gray-500 text-center mt-6">
           ไม่ได้รหัสใช่ไหม?{' '}
           <button 
             type="button"
