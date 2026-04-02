@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { api } from '../utils/api'
+import { useAuth } from '../context/AuthContext'
+import { useNavigate } from 'react-router-dom'
 
 // ── Fuel Data (Real Thai Station Colors) ───────────────────────────────
 const STATIC_FUELS = [
@@ -7,7 +10,7 @@ const STATIC_FUELS = [
   { id: 'g91', name: 'แก๊สโซฮอล์ 91', color: '#22c55e', glow: 'rgba(34,197,94,0.4)', badge: 'ยอดนิยม' },
   { id: 'e20', name: 'แก๊สโซฮอล์ E20', color: '#f97316', glow: 'rgba(249,115,22,0.4)', badge: 'ประหยัด' },
   { id: 'e85', name: 'แก๊สโซฮอล์ E85', color: '#0d9488', glow: 'rgba(13,148,136,0.4)', badge: 'พลังงานสะอาด' },
-  { id: 'b7', name: 'ดีเซล B7', color: '#3b82f6', glow: 'rgba(59,130,246,0.4)', badge: 'ดีเซลกำมะถันต่ำ' },
+  { id: 'b7', name: 'ดีเซล', color: '#3b82f6', glow: 'rgba(59,130,246,0.4)', badge: 'ดีเซลกำมะถันต่ำ' },
 ]
 
 // ── Kiosk UI Component ────────────────────────────────────────────────
@@ -42,6 +45,37 @@ export default function OrderPage({ fuels: liveFuels, onNavigate }) {
   const [isDispensing, setIsDispensing] = useState(false)
   const [progress, setProgress] = useState(0)
   const [isLocating, setIsLocating] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { user, isAuthenticated } = useAuth()
+  const navigate = useNavigate()
+
+  const handleCheckout = async () => {
+    if (!user.emailVerified) {
+      alert('กรุณายืนยันอีเมลของคุณก่อนเพื่อความปลอดภัยในการสั่งซื้อ')
+      navigate('/dashboard')
+      return
+    }
+
+    if (isSubmitting) return;
+
+    try {
+      setIsSubmitting(true)
+      await api.createOrder({
+        fuelType: selectedFuel.name,
+        liters: calculatedLiters,
+        pricePerLiter: selectedFuel.price,
+        deliveryAddress: deliveryMode === 'delivery' ? location : 'เติมที่สถานี (Walk-in)',
+        notes: note || ''
+      })
+      
+      setShowSlip(false)
+      setIsDispensing(true)
+    } catch (err) {
+      alert(err.message || 'เกิดข้อผิดพลาดในการสั่งซื้อ')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   // Get current GPS location and reverse geocode
   const handleGetLocation = () => {
@@ -100,8 +134,6 @@ export default function OrderPage({ fuels: liveFuels, onNavigate }) {
   const handleKeypad = (val) => {
     if (val === 'del') {
       setAmount(prev => prev.slice(0, -1))
-    } else if (val === 'full') {
-      setAmount('1500') // Mock full tank
     } else if (val === '00') {
       if (amount === '') return // Can't start with 00
       if (amount.includes('.') && amount.split('.')[1].length >= 2) return // limit decimal
@@ -170,10 +202,10 @@ export default function OrderPage({ fuels: liveFuels, onNavigate }) {
           <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
 
             {/* ── LEFT PANEL: FUEL SELECTION ── */}
-            <div className="w-full md:w-1/3 md:min-w-[320px] border-b md:border-b-0 md:border-r border-gray-800/80 bg-[#0d121c] p-4 md:p-6 overflow-x-hidden md:overflow-y-auto hidden-scrollbar flex-shrink-0">
+            <div className={`w-full md:w-1/3 md:min-w-[320px] border-b md:border-b-0 md:border-r border-gray-800/80 bg-[#0d121c] p-4 md:p-6 overflow-x-hidden md:overflow-y-auto hidden-scrollbar flex-shrink-0 transition-all ${isSubmitting || isDispensing ? 'pointer-events-none opacity-40 grayscale-[0.5]' : ''}`}>
               <h2 className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 md:mb-6">1. เลือกประเภทน้ำมัน</h2>
 
-              <div className="flex flex-row md:flex-col gap-4 overflow-x-auto md:overflow-visible pb-2 md:pb-0 hidden-scrollbar snap-x">
+              <div className="flex flex-row md:flex-col gap-3 md:gap-4 overflow-x-auto md:overflow-visible pb-4 md:pb-0 no-scrollbar snap-x mobile-fuel-list">
                 {KIOSK_FUELS.map(fuel => {
                   const isActive = selectedFuel?.id === fuel.id
                   return (
@@ -181,7 +213,7 @@ export default function OrderPage({ fuels: liveFuels, onNavigate }) {
                       key={fuel.id}
                       whileTap={{ scale: 0.97 }}
                       onClick={() => setSelectedFuelId(fuel.id)}
-                      className={`relative min-w-[200px] md:min-w-0 md:w-full snap-center rounded-2xl p-4 md:p-5 text-left transition-all duration-300 border-2 overflow-hidden flex-shrink-0 ${isActive ? 'bg-[#151c28]' : 'bg-[#0f1522] border-transparent hover:border-gray-700'
+                      className={`relative min-w-[160px] md:min-w-0 md:w-full snap-center rounded-xl md:rounded-2xl p-3.5 md:p-5 text-left transition-all duration-300 border-2 overflow-hidden flex-shrink-0 ${isActive ? 'bg-[#151c28]' : 'bg-[#0f1522] border-transparent hover:border-gray-700'
                         }`}
                       style={{
                         borderColor: isActive ? fuel.color : undefined,
@@ -197,11 +229,11 @@ export default function OrderPage({ fuels: liveFuels, onNavigate }) {
                             style={{ background: `${fuel.color}20`, color: fuel.color }}>
                             {fuel.badge}
                           </span>
-                          <h3 className="text-2xl font-black text-white leading-tight">{fuel.name}</h3>
+                          <h3 className="text-xl md:text-2xl font-black text-white leading-tight">{fuel.name}</h3>
                         </div>
                         <div className="text-right">
-                          <p className="text-2xl font-black" style={{ color: fuel.color }}>{fuel.price.toFixed(2)}</p>
-                          <p className="text-xs text-gray-500 font-bold uppercase tracking-wide">THB / L</p>
+                          <p className="text-xl md:text-2xl font-black" style={{ color: fuel.color }}>{fuel.price.toFixed(2)}</p>
+                          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wide">THB / L</p>
                         </div>
                       </div>
 
@@ -257,17 +289,17 @@ export default function OrderPage({ fuels: liveFuels, onNavigate }) {
                       <div className="flex justify-between items-end">
                         <div className="w-1/2">
                           <p className="text-[10px] md:text-sm font-bold text-gray-500 uppercase tracking-widest">{inputMode === 'baht' ? 'จำนวนเงิน (บาท)' : 'ที่ต้องชำระ (บาท)'}</p>
-                          <p className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-mono font-bold tracking-tighter truncate" style={{ color: inputMode === 'baht' ? '#fff' : selectedFuel.color }}>
+                          <p className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-mono font-bold tracking-tighter truncate" style={{ color: inputMode === 'baht' ? '#fff' : selectedFuel.color }}>
                             {inputMode === 'baht' ? (amount || '0') : calculatedBaht.toFixed(2)}
                             <span className="text-base sm:text-lg md:text-2xl ml-1 md:ml-2 font-sans opacity-50">฿</span>
                           </p>
                         </div>
-                        <div className="w-px h-12 md:h-16 bg-gray-800 mx-2 md:mx-6 shrink-0" />
+                        <div className="w-px h-10 md:h-16 bg-gray-800 mx-2 md:mx-6 shrink-0" />
                         <div className="w-1/2 text-right overflow-hidden">
                           <p className="text-[10px] md:text-sm font-bold text-gray-500 uppercase tracking-widest truncate">{inputMode === 'liter' ? 'จำนวนลิตร (Liters)' : 'ปริมาณน้ำมัน (Liters)'}</p>
-                          <p className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-mono font-bold tracking-tighter truncate" style={{ color: inputMode === 'liter' ? '#fff' : selectedFuel.color }}>
+                          <p className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-mono font-bold tracking-tighter truncate" style={{ color: inputMode === 'liter' ? '#fff' : selectedFuel.color }}>
                             {inputMode === 'liter' ? (amount || '0') : calculatedLiters.toFixed(2)}
-                            <span className="text-lg md:text-2xl ml-1 md:ml-2 font-sans opacity-50">L</span>
+                            <span className="text-base sm:text-lg md:text-2xl ml-1 md:ml-2 font-sans opacity-50">L</span>
                           </p>
                         </div>
                       </div>
@@ -286,11 +318,8 @@ export default function OrderPage({ fuels: liveFuels, onNavigate }) {
                             </button>
                           ))}
                         </div>
-                        <button onClick={() => applyPreset(2000)}
-                          className="w-full bg-[#151c28] border border-gray-700 hover:border-white text-blue-400 text-sm md:text-xl font-bold rounded-xl py-3 md:py-4 transition-all flex items-center justify-center gap-2">
-                          <span>⛽</span> เต็มถัง <span className="hidden md:inline">(Full Tank)</span>
-                        </button>
                       </div>
+
 
                       {/* Numeric Keypad */}
                       <div className="bg-[#0a0e16] rounded-2xl p-3 md:p-4 border border-gray-800/50 my-2 md:my-0">
@@ -318,8 +347,8 @@ export default function OrderPage({ fuels: liveFuels, onNavigate }) {
                         }}
                         disabled={numericAmount === 0 || isDispensing}
                         className={`flex-1 rounded-xl md:rounded-2xl font-black text-lg md:text-2xl tracking-wide uppercase transition-all duration-300 shadow-xl ${numericAmount > 0
-                            ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-blue-500/30 hover:scale-[1.02] active:scale-95'
-                            : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                          ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-blue-500/30 hover:scale-[1.02] active:scale-95'
+                          : 'bg-gray-800 text-gray-500 cursor-not-allowed'
                           }`}
                       >
                         {numericAmount > 0 ? 'ถัดไป ▶' : 'ระบุจำนวน'}
@@ -430,8 +459,8 @@ export default function OrderPage({ fuels: liveFuels, onNavigate }) {
                         onClick={() => setShowSlip(true)}
                         disabled={deliveryMode === 'delivery' && location.trim() === ''}
                         className={`flex-1 rounded-xl md:rounded-2xl font-black text-sm md:text-2xl tracking-wide uppercase transition-all duration-300 shadow-xl flex items-center justify-center gap-2 md:gap-3 ${(deliveryMode === 'walkin' || location.trim() !== '')
-                            ? 'bg-gradient-to-r from-emerald-500 to-emerald-400 text-white shadow-emerald-500/30 hover:scale-[1.02] active:scale-95'
-                            : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                          ? 'bg-gradient-to-r from-emerald-500 to-emerald-400 text-white shadow-emerald-500/30 hover:scale-[1.02] active:scale-95'
+                          : 'bg-gray-800 text-gray-500 cursor-not-allowed'
                           }`}
                       >
                         {deliveryMode === 'delivery' && location.trim() === '' ? 'ระบุพิกัด' : '▶ เริ่มจ่ายน้ำมัน'}
@@ -479,7 +508,7 @@ export default function OrderPage({ fuels: liveFuels, onNavigate }) {
                     {progress === 100 ? (
                       <div className="flex flex-col gap-4 mt-8 w-full max-w-[280px]">
                         <button
-                          onClick={() => onNavigate('history')}
+                          onClick={() => navigate('/history')}
                           className="py-3.5 px-6 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 text-white font-black text-lg shadow-[0_0_30px_rgba(16,185,129,0.3)] hover:scale-[1.03] active:scale-95 transition-all"
                         >
                           📋 ดูประวัติคำสั่งซื้อ
@@ -570,10 +599,16 @@ export default function OrderPage({ fuels: liveFuels, onNavigate }) {
                           แก้ไข
                         </button>
                         <button
-                          onClick={() => { setShowSlip(false); setIsDispensing(true); }}
-                          className="flex-[2] py-3 md:py-3.5 bg-gradient-to-r from-[#dc2626] to-[#b91c1c] text-white rounded-lg md:rounded-xl font-black text-sm md:text-lg hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-red-500/30"
+                          onClick={handleCheckout}
+                          disabled={isSubmitting}
+                          className={`flex-[2] py-3 md:py-3.5 bg-gradient-to-r from-[#dc2626] to-[#b91c1c] text-white rounded-lg md:rounded-xl font-black text-sm md:text-lg hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-red-500/30 flex items-center justify-center gap-2 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
                         >
-                          ยืนยัน สั่งซื้อเลย
+                          {isSubmitting ? (
+                            <>
+                              <div className="w-5 h-5 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+                              กำลังสั่งซื้อ...
+                            </>
+                          ) : 'ยืนยัน สั่งซื้อเลย'}
                         </button>
                       </div>
 
@@ -585,6 +620,35 @@ export default function OrderPage({ fuels: liveFuels, onNavigate }) {
 
           </div>
         </div>
+
+        {/* Global Loading Overlay */}
+        <AnimatePresence>
+          {isSubmitting && (
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[10000] bg-[#07090e]/80 backdrop-blur-xl flex items-center justify-center p-6 text-center"
+            >
+              <motion.div 
+                initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
+                className="bg-[#0f172a] p-8 md:p-12 rounded-[3.5rem] shadow-2xl max-w-sm w-full border border-gray-700/50"
+              >
+                <div className="relative w-24 h-24 mx-auto mb-8">
+                  <div className="absolute inset-0 border-8 border-gray-800 rounded-full"></div>
+                  <div className="absolute inset-0 border-8 border-red-600 rounded-full border-t-transparent animate-spin"></div>
+                  <div className="absolute inset-0 flex items-center justify-center text-4xl">⛽</div>
+                </div>
+                <h3 className="text-2xl font-black text-white mb-3 tracking-tighter italic uppercase">กำลังประมวลผลคำสั่งซื้อ</h3>
+                <p className="text-gray-400 font-bold text-sm leading-relaxed mb-6">ระบบกำลังบันทึกข้อมูลการสั่งซื้อของคุณ<br/>เพื่อความปลอดภัย กรุณาอย่าปิดหน้านี้</p>
+                <div className="px-6 py-2.5 bg-red-500/10 rounded-full inline-block border border-red-500/20">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
+                    <span className="text-[10px] font-black text-red-500 uppercase tracking-widest">ล็อกเพื่อความปลอดภัย</span>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
     </div>

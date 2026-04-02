@@ -5,7 +5,8 @@ function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max)
 }
 
-export default function PriceCalculator({ fuel }) {
+// ✅ รับ isLocked เข้ามา
+export default function PriceCalculator({ fuel, isLocked }) {
   const [liters, setLiters] = useState('')
   const [baht, setBaht] = useState('')
   const [lastEdited, setLastEdited] = useState(null) // 'liters' | 'baht'
@@ -51,6 +52,7 @@ export default function PriceCalculator({ fuel }) {
   )
 
   const handleReset = () => {
+    if (isLocked) return // ห้ามรีเซ็ตตอนล็อก
     setLiters('')
     setBaht('')
     setLastEdited(null)
@@ -60,6 +62,7 @@ export default function PriceCalculator({ fuel }) {
   const presets = [100, 200, 500, 1000]
 
   const applyPreset = (amount) => {
+    if (isLocked) return // ห้ามกดตอนล็อก
     setLastEdited('baht')
     setBaht(amount.toString())
     const computed = clamp(amount / pricePerLiter, 0, 9999)
@@ -70,7 +73,9 @@ export default function PriceCalculator({ fuel }) {
   const litersNum = parseFloat(liters) || 0
 
   return (
-    <div className="w-full space-y-4">
+    // ✅ เพิ่ม pointer-events-none และ opacity เมื่อถูกล็อก
+    <div className={`w-full space-y-4 transition-all duration-300 ${isLocked ? 'pointer-events-none opacity-60' : ''}`}>
+
       {/* ── ปุ่มเติมด่วน ── */}
       <div>
         <p className="text-xs font-bold tracking-widest uppercase text-gray-400 mb-2">
@@ -81,21 +86,15 @@ export default function PriceCalculator({ fuel }) {
             <motion.button
               key={amount}
               id={`preset-btn-${amount}`}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={!isLocked ? { scale: 1.05 } : {}}
+              whileTap={!isLocked ? { scale: 0.95 } : {}}
+              disabled={isLocked}
               onClick={() => applyPreset(amount)}
-              className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200"
+              className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${isLocked ? 'cursor-not-allowed' : ''}`}
               style={{
-                background:
-                  parseFloat(baht) === amount
-                    ? accentBg
-                    : 'rgba(0,0,0,0.03)',
-                border: `1px solid ${parseFloat(baht) === amount
-                    ? accentBorder
-                    : 'rgba(0,0,0,0.06)'
-                  }`,
-                color:
-                  parseFloat(baht) === amount ? accentColor : '#64748b',
+                background: parseFloat(baht) === amount ? accentBg : 'rgba(0,0,0,0.03)',
+                border: `1px solid ${parseFloat(baht) === amount ? accentBorder : 'rgba(0,0,0,0.06)'}`,
+                color: parseFloat(baht) === amount ? accentColor : '#64748b',
               }}
             >
               ฿{amount}
@@ -118,28 +117,19 @@ export default function PriceCalculator({ fuel }) {
           accentBg={accentBg}
           accentBorder={accentBorder}
           isActive={lastEdited === 'liters'}
+          isLocked={isLocked} // ✅ ส่งสถานะล็อกไปที่ Input
           icon={
             <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round"
-                d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
             </svg>
           }
         />
 
         {/* ไอคอนสลับ */}
         <div className="flex items-center justify-center">
-          <div
-            className="w-8 h-8 rounded-full flex items-center justify-center"
-            style={{
-              background: accentBg,
-              border: `1px solid ${accentBorder}`,
-            }}
-          >
+          <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: accentBg, border: `1px solid ${accentBorder}` }}>
             <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke={accentColor} strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round"
-                d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5" />
             </svg>
           </div>
         </div>
@@ -156,11 +146,10 @@ export default function PriceCalculator({ fuel }) {
           accentBg={accentBg}
           accentBorder={accentBorder}
           isActive={lastEdited === 'baht'}
+          isLocked={isLocked} // ✅ ส่งสถานะล็อกไปที่ Input
           icon={
             <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round"
-                d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
             </svg>
           }
         />
@@ -175,10 +164,7 @@ export default function PriceCalculator({ fuel }) {
             exit={{ opacity: 0, y: 8, scale: 0.97 }}
             transition={{ duration: 0.25 }}
             className="rounded-2xl p-4 space-y-2"
-            style={{
-              background: accentBg,
-              border: `1px solid ${accentBorder}`,
-            }}
+            style={{ background: accentBg, border: `1px solid ${accentBorder}` }}
           >
             <div className="flex items-center justify-between">
               <span className="text-xs text-gray-500 uppercase tracking-wider font-bold">
@@ -187,7 +173,8 @@ export default function PriceCalculator({ fuel }) {
               <button
                 id="btn-reset-calculator"
                 onClick={handleReset}
-                className="text-xs text-gray-400 hover:text-gray-600 transition-colors duration-150 underline underline-offset-2"
+                disabled={isLocked}
+                className={`text-xs text-gray-400 transition-colors duration-150 underline underline-offset-2 ${isLocked ? 'cursor-not-allowed' : 'hover:text-gray-600'}`}
               >
                 รีเซ็ต
               </button>
@@ -195,10 +182,7 @@ export default function PriceCalculator({ fuel }) {
 
             <div className="flex items-end justify-between">
               <div>
-                <p
-                  className="text-3xl font-black tracking-tight"
-                  style={{ color: accentColor }}
-                >
+                <p className="text-3xl font-black tracking-tight" style={{ color: accentColor }}>
                   {litersNum.toFixed(2)}
                   <span className="text-base font-semibold ml-1 opacity-70">ล.</span>
                 </p>
@@ -220,9 +204,7 @@ export default function PriceCalculator({ fuel }) {
                 className="h-full rounded-full"
                 style={{ background: accentColor }}
                 initial={{ width: '0%' }}
-                animate={{
-                  width: `${Math.min((litersNum / 60) * 100, 100)}%`,
-                }}
+                animate={{ width: `${Math.min((litersNum / 60) * 100, 100)}%` }}
                 transition={{ duration: 0.4, ease: 'easeOut' }}
               />
             </div>
@@ -237,19 +219,7 @@ export default function PriceCalculator({ fuel }) {
 }
 
 // ── คอมโพเนนต์ย่อย: InputField ──────────────────────────────────
-function InputField({
-  id,
-  label,
-  unit,
-  value,
-  onChange,
-  placeholder,
-  accentColor,
-  accentBg,
-  accentBorder,
-  isActive,
-  icon,
-}) {
+function InputField({ id, label, unit, value, onChange, placeholder, accentColor, accentBg, accentBorder, isActive, icon, isLocked }) {
   return (
     <div
       className="rounded-xl p-3.5 transition-all duration-200"
@@ -261,19 +231,12 @@ function InputField({
     >
       <div className="flex items-center gap-2 mb-1.5">
         <span style={{ color: isActive ? accentColor : '#475569' }}>{icon}</span>
-        <label
-          htmlFor={id}
-          className="text-xs font-semibold uppercase tracking-wider cursor-pointer"
-          style={{ color: isActive ? accentColor : '#64748b' }}
-        >
+        <label htmlFor={id} className="text-xs font-semibold uppercase tracking-wider" style={{ color: isActive ? accentColor : '#64748b' }}>
           {label}
         </label>
       </div>
       <div className="flex items-baseline gap-2">
-        <span
-          className="text-2xl font-black"
-          style={{ color: isActive ? accentColor : '#334155' }}
-        >
+        <span className="text-2xl font-black" style={{ color: isActive ? accentColor : '#334155' }}>
           {unit}
         </span>
         <input
@@ -283,7 +246,8 @@ function InputField({
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          className="flex-1 bg-transparent text-2xl font-black outline-none placeholder:text-gray-300 transition-colors duration-200"
+          disabled={isLocked} // ✅ ปิดการพิมพ์เมื่อถูกล็อก
+          className={`flex-1 bg-transparent text-2xl font-black outline-none placeholder:text-gray-300 transition-colors duration-200 ${isLocked ? 'cursor-not-allowed' : ''}`}
           style={{ color: isActive ? '#0f172a' : '#475569' }}
         />
       </div>
