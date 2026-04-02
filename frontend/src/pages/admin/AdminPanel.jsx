@@ -302,15 +302,18 @@ export default function AdminPanel() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-4">
-            <div className="bg-orange-50 px-4 py-1.5 rounded-full flex items-center gap-2 border border-orange-100 hidden sm:flex">
+          <div className="flex items-center gap-2 md:gap-4">
+            <div className="bg-orange-50 px-3 md:px-4 py-1.5 rounded-full flex items-center gap-2 border border-orange-100 hidden sm:flex">
               <div className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse" />
-              <span className="text-[11px] font-black text-orange-600 uppercase tracking-widest">โหมดผู้ดูแล</span>
+              <span className="text-[9px] md:text-[11px] font-black text-orange-600 uppercase tracking-widest leading-none">โหมดผู้ดูแล</span>
             </div>
-            <Link to="/" className="px-5 py-2 bg-white border border-gray-100 text-gray-600 font-bold text-xs rounded-xl hover:bg-gray-50 transition-all flex items-center gap-2">
+            <Link to="/" className="p-2 md:px-5 md:py-2 bg-white border border-gray-100 text-gray-600 font-bold text-xs rounded-xl hover:bg-gray-50 transition-all flex items-center gap-2">
               🏠 <span className="hidden md:inline">กลับหน้าหลัก</span>
             </Link>
-            <button onClick={logout} className="px-5 py-2 bg-[#dc2626] text-white font-black text-xs rounded-xl shadow-lg shadow-red-200/50 hover:bg-red-700 transition-all">ออกจากระบบ</button>
+            <button onClick={logout} className="p-2 md:px-5 md:py-2 bg-[#dc2626] text-white font-black text-xs rounded-xl shadow-lg shadow-red-200/50 hover:bg-red-700 transition-all flex items-center gap-2">
+              <span className="md:hidden">🚪</span>
+              <span className="hidden md:inline">ออกจากระบบ</span>
+            </button>
           </div>
         </div>
       </header>
@@ -344,9 +347,9 @@ export default function AdminPanel() {
                       { l: 'รายการสั่งซื้อรวม', v: `${stats.totalOrders.toLocaleString()} รายการ`, c: 'text-amber-500' },
                       { l: 'สมาชิกในระบบ', v: `${stats.totalUsers.toLocaleString()} คน`, c: 'text-blue-600' }
                     ].map((x, i) => (
-                      <div key={i} className="glass-card p-10 rounded-[2.5rem] shadow-sm border border-white hover:shadow-md transition-shadow">
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">{x.l}</p>
-                        <h3 className={`text-4xl font-black ${x.c} tracking-tighter`}>{x.v}</h3>
+                      <div key={i} className="glass-card p-6 sm:p-10 rounded-3xl sm:rounded-[2.5rem] shadow-sm border border-white hover:shadow-md transition-shadow">
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 sm:mb-4">{x.l}</p>
+                        <h3 className={`text-3xl sm:text-4xl font-black ${x.c} tracking-tighter`}>{x.v}</h3>
                       </div>
                     ))}
                     <div className="bg-gradient-to-br from-red-600 to-red-700 p-10 rounded-[2.5rem] text-white shadow-xl shadow-red-200">
