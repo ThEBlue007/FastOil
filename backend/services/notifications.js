@@ -1,7 +1,12 @@
 const { Resend } = require('resend')
 const twilio = require('twilio')
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+let resend = null
+if (process.env.RESEND_API_KEY) {
+  resend = new Resend(process.env.RESEND_API_KEY)
+} else {
+  console.warn('⚠️ Warning: RESEND_API_KEY is missing. Email notifications will not work.')
+}
 
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString()
@@ -69,8 +74,13 @@ async function sendEmailOTP(email, name, code, type = 'verify') {
 </body>
 </html>`
 
+  if (!resend) {
+    console.log(`[DEV/MOCK] Email OTP to ${email} [${type}]: ${code}`)
+    return
+  }
+
   await resend.emails.send({
-    from: process.env.RESEND_FROM_EMAIL,
+    from: process.env.RESEND_FROM_EMAIL || 'FastOil <noreply@resend.dev>',
     to: email,
     subject: subjects[type],
     html,
@@ -109,8 +119,13 @@ async function sendPasswordResetEmail(email, name, resetLink) {
 </body>
 </html>`
 
+  if (!resend) {
+    console.log(`[DEV/MOCK] Password reset link to ${email}: ${resetLink}`)
+    return
+  }
+
   await resend.emails.send({
-    from: process.env.RESEND_FROM_EMAIL,
+    from: process.env.RESEND_FROM_EMAIL || 'FastOil <noreply@resend.dev>',
     to: email,
     subject: 'รีเซ็ตรหัสผ่าน — FastOil',
     html,
