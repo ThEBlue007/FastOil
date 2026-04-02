@@ -38,6 +38,10 @@ app.use('/api/auth', authRoutes)
 app.use('/api/orders', ordersRoutes)
 app.use('/api/admin', adminRoutes)
 
+// ── Health Check ───────────────────────────────────────────────────────────────
+app.get('/', (req, res) => res.send('🚀 FastOil API is online!'))
+app.get('/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }))
+
 // ── 404 Handler ────────────────────────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({ error: 'ไม่พบ endpoint นี้' })
