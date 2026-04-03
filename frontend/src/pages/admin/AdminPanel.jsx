@@ -57,11 +57,17 @@ const PieChart = ({ data, mode = 'revenue' }) => {
       </div>
       <div className="grid grid-cols-2 sm:flex sm:flex-col gap-3 w-full sm:w-auto">
         {data.map((s, i) => (
-          <div key={i} className="flex items-center gap-3 bg-gray-50 sm:bg-transparent p-2 sm:p-0 rounded-xl">
-            <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: colors[i % colors.length] }} />
-            <div className="text-[11px] sm:text-[12px] truncate">
-              <span className="font-bold text-gray-900 block sm:inline">{s.fuel_type}</span>
-              <span className="text-gray-400 sm:ml-2 font-black">{Math.round(((mode === 'revenue' ? s.revenue : s.liters) / total) * 100)}%</span>
+          <div key={i} className="flex items-start gap-3 bg-gray-50/50 sm:bg-transparent p-3 sm:p-0 rounded-2xl border border-gray-100 sm:border-0 shadow-sm sm:shadow-none">
+            <div className="w-3 h-3 rounded-full flex-shrink-0 mt-1.5 sm:mt-1" style={{ backgroundColor: colors[i % colors.length] }} />
+            <div className="text-[10px] sm:text-[12px] min-w-0 flex-1">
+              <div className="flex justify-between items-center mb-1">
+                <span className="font-black text-gray-900 uppercase tracking-tight truncate">{s.fuel_type}</span>
+                <span className="text-gray-400 font-black text-[9px] sm:text-[10px] opacity-70 ml-2">{Math.round(((mode === 'revenue' ? s.revenue : s.liters) / total) * 100)}%</span>
+              </div>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 font-bold">
+                <span className="text-[#dc2626] whitespace-nowrap">{s.revenue.toLocaleString()}</span>
+                <span className="text-blue-600 whitespace-nowrap">{s.liters.toLocaleString()}</span>
+              </div>
             </div>
           </div>
         ))}
@@ -150,7 +156,7 @@ export default function AdminPanel() {
   const [search, setSearch] = useState('')
   const { logout } = useAuth()
   const [selectedOrder, setSelectedOrder] = useState(null)
-  const [pieMode, setPieMode] = useState('revenue')
+
   const location = useLocation()
 
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false)
@@ -300,12 +306,11 @@ export default function AdminPanel() {
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-4">
-            <Link to="/" className="p-2 sm:px-4 sm:py-2 bg-white border border-gray-100 text-gray-600 font-bold text-xs rounded-xl hover:bg-gray-50 transition-all flex items-center gap-2">
-              🏠 <span className="hidden sm:inline">กลับหน้าหลัก</span>
+            <Link to="/" className="p-2 px-4 py-2 bg-white border border-gray-100 text-gray-600 font-bold text-xs rounded-xl hover:bg-gray-50 transition-all flex items-center gap-2">
+              <span className="text-[10px] sm:text-xs">หน้าหลัก</span>
             </Link>
-            <button onClick={logout} className="p-2 sm:px-4 sm:py-2 bg-[#dc2626] text-white font-black text-xs rounded-xl shadow-lg shadow-red-200/50 hover:bg-red-700 transition-all flex items-center gap-2">
-              <span className="sm:hidden">🚪</span>
-              <span className="hidden sm:inline">ออกจากระบบ</span>
+            <button onClick={logout} className="p-2 px-4 py-2 bg-[#dc2626] text-white font-black text-xs rounded-xl shadow-lg shadow-red-200/50 hover:bg-red-700 transition-all flex items-center gap-2">
+              <span className="text-[10px] sm:text-xs">ออกจากระบบ</span>
             </button>
           </div>
         </div>
@@ -392,12 +397,10 @@ export default function AdminPanel() {
                       <div className="glass-card p-6 sm:p-8 rounded-[2rem] shadow-sm flex flex-col h-full bg-white/40">
                         <div className="flex justify-between items-center mb-6">
                            <h3 className="font-black text-gray-900 text-sm uppercase tracking-widest">⛽ สัดส่วนเชื้อเพลิง</h3>
-                           <button onClick={() => setPieMode(pieMode === 'revenue' ? 'liters' : 'revenue')} className="px-4 py-2 bg-white border border-gray-100 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-sm hover:bg-gray-50 transition-all">
-                             หน่วย: {pieMode === 'revenue' ? 'เงิน' : 'ลิตร'}
-                           </button>
+
                         </div>
                         <div className="flex-1 flex items-center justify-center">
-                          <PieChart data={stats.fuelStats} mode={pieMode} />
+                          <PieChart data={stats.fuelStats} mode="revenue" />
                         </div>
                       </div>
                     </div>
@@ -555,9 +558,20 @@ export default function AdminPanel() {
                                </div>
                                <input type="checkbox" checked={selectedUsers.includes(u.id)} onChange={() => toggleSelectUser(u.id)} className="w-6 h-6 rounded-lg text-[#dc2626]" />
                             </div>
-                            <div className="flex gap-2 items-center mb-4">
-                               <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${u.is_banned ? 'bg-red-100 text-red-600' : 'bg-blue-50 text-blue-600'}`}>{u.is_banned ? 'BANNED' : 'ACTIVE'}</span>
-                               <span className="px-3 py-1 bg-gray-100 rounded-full text-[9px] font-black uppercase tracking-widest text-gray-400">{u.role}</span>
+                            <div className="space-y-3 mb-4">
+                               <div className="flex items-center gap-2">
+                                  <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${u.is_banned ? 'bg-red-100 text-red-600' : 'bg-blue-50 text-blue-600'}`}>{u.is_banned ? 'BANNED' : 'ACTIVE'}</span>
+                               </div>
+                               <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-2xl border border-gray-100/50">
+                                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">สิทธิ์การใช้งาน</span>
+                                  <select 
+                                    value={u.role} 
+                                    onChange={e => handleRoleChange(u.id, e.target.value)}
+                                    className="flex-1 bg-white px-3 py-1.5 rounded-xl text-[10px] font-black outline-none uppercase border border-gray-200 cursor-pointer shadow-sm transition-all text-gray-700"
+                                  >
+                                    {['user', 'admin'].map(r => (<option key={r} value={r}>{r.toUpperCase()}</option>))}
+                                  </select>
+                               </div>
                             </div>
                             <div className="grid grid-cols-2 gap-3 pt-4 border-t border-gray-50">
                                <button onClick={() => handleBanUser(u.id, !u.is_banned)} className="py-2.5 bg-orange-50 text-orange-600 rounded-xl font-black text-[10px] uppercase tracking-widest">{u.is_banned ? 'ปลดแบน' : 'ระงับการใช้'}</button>
@@ -574,9 +588,20 @@ export default function AdminPanel() {
                                </div>
                                <p className="text-lg font-black text-[#dc2626] tabular-nums">฿{o.total_price.toLocaleString()}</p>
                             </div>
-                            <div className="flex items-center gap-2 mb-6">
-                               <span className="text-[10px] font-black bg-gray-100 px-3 py-1 rounded-full text-gray-500 uppercase">{o.fuel_type}</span>
-                               <span className="text-[10px] font-bold text-gray-400 uppercase">{o.liters}L</span>
+                            <div className="flex items-center justify-between gap-2 mb-6">
+                               <div className="flex items-center gap-2">
+                                 <span className="text-[10px] font-black bg-gray-100 px-3 py-1 rounded-full text-gray-500 uppercase">{o.fuel_type}</span>
+                                 <span className="text-[10px] font-bold text-gray-400 uppercase">{o.liters}L</span>
+                               </div>
+                               <div className="flex-1 max-w-[140px]">
+                                 <select 
+                                   value={o.status} 
+                                   onChange={e => handleUpdateStatus(o.id, e.target.value)}
+                                   className="w-full bg-gray-50/80 px-3 py-2 rounded-xl text-[10px] font-black outline-none border border-gray-100 uppercase shadow-sm cursor-pointer hover:bg-white transition-all ring-1 ring-gray-50 text-gray-600"
+                                 >
+                                   {Object.entries(STATUS_TH).map(([val, label]) => (<option key={val} value={val}>{label}</option>))}
+                                 </select>
+                               </div>
                             </div>
                             <div className="flex gap-2">
                                <button 
