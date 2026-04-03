@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../utils/api'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 
 // --- กราฟเส้น (เทรนด์รายได้) สไตล์ Glass UI ---
@@ -135,7 +135,13 @@ const CancelReasonModal = ({ isOpen, onClose, onConfirm, reason, setReason }) =>
 const STATUS_TH = { pending: 'รอดำเนินการ', confirmed: 'ยืนยันแล้ว', delivering: 'กำลังจัดส่ง', delivered: 'ส่งสำเร็จ', cancelled: 'ยกเลิกแล้ว' }
 
 export default function AdminPanel() {
-  const [activeTab, setActiveTab] = useState('dashboard')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activeTab = searchParams.get('tab') || 'dashboard'
+  
+  const setActiveTab = (tab) => {
+    setSearchParams({ tab })
+  }
+
   const [stats, setStats] = useState(null)
   const [users, setUsers] = useState([])
   const [orders, setOrders] = useState([])
