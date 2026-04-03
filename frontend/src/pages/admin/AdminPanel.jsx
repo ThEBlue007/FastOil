@@ -495,18 +495,22 @@ export default function AdminPanel() {
                                   {['user', 'admin'].map(r => (<option key={r} value={r}>{r.toUpperCase()}</option>))}
                                 </select>
                               </td>
-                              <td className="px-6 py-8 text-right space-x-2">
-                                <button onClick={() => handleBanUser(u.id, !u.is_banned)} title={u.is_banned ? "ปลดแบน" : "ระงับการใช้งาน"} className="group relative p-3 bg-orange-50 text-orange-600 rounded-xl hover:bg-orange-600 hover:text-white transition-all text-sm shadow-sm">
-                                  ⚖️
-                                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none font-bold z-10 transition-all">
-                                    {u.is_banned ? 'ปลดแบน' : 'ระงับไอดี'}
-                                  </span>
+                              <td className="px-6 py-8 text-right flex justify-end gap-2">
+                                <button 
+                                  onClick={() => handleBanUser(u.id, !u.is_banned)} 
+                                  className={`px-4 py-2 rounded-xl font-black text-xs transition-all shadow-sm flex items-center gap-2 ${
+                                    u.is_banned 
+                                    ? 'bg-green-50 text-green-600 hover:bg-green-600 hover:text-white' 
+                                    : 'bg-orange-50 text-orange-600 hover:bg-orange-600 hover:text-white'
+                                  }`}
+                                >
+                                  {u.is_banned ? 'ปลดแบน' : 'ระงับไอดี'}
                                 </button>
-                                <button onClick={() => handleDeleteSingleUser(u.id)} title="ลบบัญชีถาวร" className="group relative p-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all text-sm shadow-sm">
-                                  🗑️
-                                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-red-900 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none font-bold z-10 transition-all">
-                                    ลบบัญชี
-                                  </span>
+                                <button 
+                                  onClick={() => handleDeleteSingleUser(u.id)} 
+                                  className="px-4 py-2 bg-red-50 text-red-600 rounded-xl font-black text-xs hover:bg-red-600 hover:text-white transition-all shadow-sm flex items-center gap-2"
+                                >
+                                  ลบทิ้ง
                                 </button>
                               </td>
                             </tr>

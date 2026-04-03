@@ -51,8 +51,17 @@ app.get('/healthz', (req, res) => res.send('ok'))
 // ── SPA Catch-all Route ────────────────────────────────────────────────────────
 // This MUST be after all API routes. Any route not matching /api will serve frontend index.html
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/dist/index.html'))
-})
+  const indexPath = path.join(__dirname, '../frontend/dist/index.html');
+  
+  // 🔍 ตรวจสอบว่ามีไฟล์อยู่จริงไหม
+  if (require('fs').existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    // ⚠️ ถ้าไม่พบไฟล์ ให้ส่งข้อความแจ้งเตือนที่ชัดเจน (เพื่อการ Debug)
+    console.error(`❌ SPA Error: index.html not found at ${indexPath}`);
+    res.status(404).send('ระบบยังสร้างหน้าเว็บไม่เสร็จ หรือหาไฟล์ไม่พบ กรุณารอ Deploy สักครู่ หรือติดต่อผู้พัฒนาครับ (Error: 404 - index.html missing)');
+  }
+});
 
 // ── Error Handler ──────────────────────────────────────────────────────────────
 app.use((err, req, res, next) => {
