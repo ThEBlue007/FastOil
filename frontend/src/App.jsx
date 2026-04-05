@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import { AuthProvider } from './context/AuthContext'
-import { AnimatePresence } from 'framer-motion'
+import { AuthProvider, useAuth } from './context/AuthContext'
+import { AnimatePresence, motion } from 'framer-motion'
 import { api } from './utils/api'
 import ProtectedRoute from './components/ProtectedRoute'
 import Navbar from './components/Navbar/Navbar'
@@ -30,11 +30,57 @@ const DEFAULT_FUELS = [
 ]
 
 function AppContent() {
+  const { user } = useAuth()
+  const [globalError, setGlobalError] = useState(null)
   const [fuels, setFuels] = useState(DEFAULT_FUELS)
   const [loadingPrices, setLoadingPrices] = useState(true)
   const [lastUpdate, setLastUpdate] = useState('')
   const [activeOrder, setActiveOrder] = useState(null)
   const location = useLocation()
+
+  // --- Global Error Listeners ---
+  useEffect(() => {
+    const handleError = (event) => {
+      const errorMsg = event.message || 'Unknown Error'
+      setGlobalError(errorMsg) // แสดงบนหน้าจอ
+      
+      api.reportError({
+        type: 'UNCAUGHT_ERROR',
+        message: errorMsg,
+        stack: event.error?.stack,
+        path: window.location.pathname,
+        source: 'WindowOnError',
+        user: user ? { id: user.id, email: user.email } : null
+      })
+    }
+
+    const handleRejection = (event) => {
+      const errorMsg = event.reason?.message || 'Promise Rejection'
+      setGlobalError(errorMsg) // แสดงบนหน้าจอ
+
+      api.reportError({
+        type: 'UNHANDLED_REJECTION',
+        message: errorMsg,
+        stack: event.reason?.stack,
+        path: window.location.pathname,
+        source: 'WindowOnRejection',
+        user: user ? { id: user.id, email: user.email } : null
+      })
+    }
+
+    window.addEventListener('error', handleError)
+    window.addEventListener('unhandledrejection', handleRejection)
+
+    return () => {
+      window.removeEventListener('error', handleError)
+      window.removeEventListener('unhandledrejection', handleRejection)
+    }
+  }, [user])
+
+  // ล้าง Error เมื่อเปลี่ยนหน้า
+  useEffect(() => {
+    setGlobalError(null)
+  }, [location.pathname])
 
   // ── 1. ดึงราคาน้ำมันเรียลไทม์ (คงเดิม) ──────────────────────────────────────────
   useEffect(() => {
@@ -122,8 +168,50 @@ function AppContent() {
   const shouldShowNavbar = !hideNavbarRoutes.includes(location.pathname) && !location.pathname.startsWith('/admin')
 
   return (
-    <div className="relative min-h-screen bg-gray-50 flex flex-col">
+    <div className="relative min-h-screen bg-[#f8fafc] font-['Sarabun',_sans-serif]">
+      {/* 🚨 Global Bug Alert Overlay ( Nitro Elite Style ) */}
+      <AnimatePresence mode="wait">
+        {globalError && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            className="fixed top-6 left-0 right-0 z-[10000] flex justify-center px-4 pointer-events-none"
+          >
+            <div className="bg-white/80 border border-red-200 rounded-[2rem] shadow-[0_20px_50px_rgba(30,41,59,0.15)] p-5 max-w-xl w-full flex items-center gap-5 backdrop-blur-2xl pointer-events-auto overflow-hidden relative">
+              {/* Decorative accent */}
+              <div className="absolute top-0 left-0 w-2 h-full bg-red-500" />
+              
+              <div className="bg-red-50 text-red-500 w-12 h-12 rounded-2xl flex items-center justify-center text-xl shrink-0 shadow-sm border border-red-100">
+                ⚠️
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-blue-950 font-black text-xs uppercase tracking-widest mb-0.5">ตรวจพบข้อผิดพลาด</h3>
+                <p className="text-gray-500 font-bold text-[11px] truncate opacity-80 mb-3">
+                  {globalError}
+                </p>
+                <div className="flex gap-2">
+                   <button 
+                    onClick={() => window.location.reload()}
+                    className="px-4 py-1.5 bg-blue-950 text-white text-[10px] font-black rounded-xl hover:bg-slate-800 transition-all uppercase tracking-wider"
+                   >
+                     Retry
+                   </button>
+                   <button 
+                    onClick={() => setGlobalError(null)}
+                    className="px-4 py-1.5 bg-gray-100 text-gray-500 text-[10px] font-black rounded-xl hover:bg-gray-200 transition-all uppercase tracking-wider"
+                   >
+                     Dismiss
+                   </button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {shouldShowNavbar && <Navbar currentPage={location.pathname.substring(1) || 'home'} onNavigate={navigateFallback} />}
+
 
       <main className="flex-1">
         <Routes>
@@ -161,12 +249,18 @@ function AppContent() {
   )
 }
 
+import ErrorBoundary from './components/ErrorBoundary'
+
+// ... existing code ...
+
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <AppContent />
-      </BrowserRouter>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <BrowserRouter>
+          <AppContent />
+        </BrowserRouter>
+      </AuthProvider>
+    </ErrorBoundary>
   )
-}
+}

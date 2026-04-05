@@ -8,6 +8,7 @@ const { generalLimiter } = require('./middleware/rateLimiter')
 const authRoutes = require('./routes/auth')
 const ordersRoutes = require('./routes/orders')
 const adminRoutes = require('./routes/admin')
+const logsRoutes = require('./routes/logs')
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -43,6 +44,8 @@ app.use(express.static(path.join(__dirname, '../frontend/dist')))
 app.use('/api/auth', authRoutes)
 app.use('/api/orders', ordersRoutes)
 app.use('/api/admin', adminRoutes)
+app.use('/api/logs', logsRoutes)
+
 
 // ⚡ Health Check (Non-root)
 app.get('/health', (req, res) => res.send('ok'))
@@ -63,11 +66,11 @@ app.get('*', (req, res) => {
   }
 });
 
+const errorHandler = require('./middleware/errorHandler')
+
 // ── Error Handler ──────────────────────────────────────────────────────────────
-app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err)
-  res.status(500).json({ error: 'เกิดข้อผิดพลาดภายในระบบ' })
-})
+app.use(errorHandler)
+
 
 // ── Start Server ───────────────────────────────────────────────────────────────
 function start() {

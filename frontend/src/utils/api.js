@@ -46,4 +46,7 @@ export const api = {
   deleteOrder: (id) => request(`/api/admin/orders/${id}`, { method: 'DELETE' }),
 
   getActivityLogs: (params = '') => request(`/api/admin/logs${params}`),
-}
+  
+  // Logs
+  reportError: (body) => request('/api/logs/report', { method: 'POST', body: JSON.stringify(body) }).catch(err => console.warn('Error reporting failed:', err)),
+}

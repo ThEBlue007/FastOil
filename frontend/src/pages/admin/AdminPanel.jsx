@@ -4,8 +4,10 @@ import { api } from '../../utils/api'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 
+const STATUS_TH = { pending: 'รอดำเนินการ', confirmed: 'ยืนยันแล้ว', delivering: 'กำลังจัดส่ง', delivered: 'ส่งสำเร็จ', cancelled: 'ยกเลิกแล้ว' }
+
 // --- กราฟเส้น (เทรนด์รายได้) สไตล์ Glass UI ---
-const LineChart = ({ data }) => {
+function LineChart({ data }) {
   if (!data || data.length === 0) return <div className="h-48 flex items-center justify-center text-gray-400 font-bold">ยังไม่มีข้อมูล</div>
   const maxVal = Math.max(...data.map(d => d.revenue)) * 1.2 || 1
   const height = 180
@@ -138,39 +140,39 @@ const CancelReasonModal = ({ isOpen, onClose, onConfirm, reason, setReason }) =>
   )
 }
 
-const STATUS_TH = { pending: 'รอดำเนินการ', confirmed: 'ยืนยันแล้ว', delivering: 'กำลังจัดส่ง', delivered: 'ส่งสำเร็จ', cancelled: 'ยกเลิกแล้ว' }
+// --- ส่วนประกอบหลัก ---
 
 export default function AdminPanel() {
+  // --- 1. State & Base Hooks ---
   const [searchParams, setSearchParams] = useSearchParams()
   const activeTab = searchParams.get('tab') || 'dashboard'
+  const location = useLocation()
+  const { logout } = useAuth()
   
-  const setActiveTab = (tab) => {
-    setSearchParams({ tab })
-  }
-
+  // --- 2. Functional State ---
+  const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState(null)
   const [users, setUsers] = useState([])
   const [orders, setOrders] = useState([])
   const [logs, setLogs] = useState([])
-  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const { logout } = useAuth()
+  
   const [selectedOrder, setSelectedOrder] = useState(null)
-
-  const location = useLocation()
-
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false)
   const [cancelOrderId, setCancelOrderId] = useState(null)
   const [cancelReason, setCancelReason] = useState('')
 
+  // --- 3. Filters ---
   const [filterLogRole, setFilterLogRole] = useState('all') 
   const [filterAction, setFilterAction] = useState('')
   const [filterRole, setFilterRole] = useState('all') 
-  const [selectedUsers, setSelectedUsers] = useState([])
   const [filterOrderStatus, setFilterOrderStatus] = useState('all')
+  const [selectedUsers, setSelectedUsers] = useState([])
 
-  useEffect(() => { loadData() }, [activeTab])
-  useEffect(() => { if (activeTab === 'orders') loadData() }, [filterOrderStatus])
+  // --- 4. Logic Functions ---
+  const setActiveTab = (tab) => {
+    setSearchParams({ tab })
+  }
 
   const loadData = async () => {
     setLoading(true)
@@ -185,6 +187,11 @@ export default function AdminPanel() {
       else if (activeTab === 'logs') { const d = await api.getActivityLogs(); setLogs(d.logs || []) }
     } catch (err) { console.error(err) } finally { setLoading(false) }
   }
+
+  // --- 5. Effects ---
+  useEffect(() => { loadData() }, [activeTab])
+  useEffect(() => { if (activeTab === 'orders') loadData() }, [filterOrderStatus])
+
 
   const handleUpdateStatus = async (id, s) => {
     if (s === 'cancelled') {

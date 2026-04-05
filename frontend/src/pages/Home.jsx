@@ -249,5 +249,6 @@ export default function Home({ fuels, loading, lastUpdate }) {
             <CTABanner />
             {/* ไม่ต้องมี FloatingOrderWidget ตรงนี้แล้วครับ */}
         </div>
-    )
+    );
 }
+
