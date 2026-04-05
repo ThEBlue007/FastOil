@@ -2,6 +2,8 @@ const express = require('express')
 const { getDb, logActivity } = require('../db')
 const { authenticate } = require('../middleware/auth')
 const { adminOnly } = require('../middleware/adminOnly')
+const { sendOrderStatusUpdateEmail } = require('../services/notifications')
+
 
 const router = express.Router()
 
@@ -194,11 +196,26 @@ router.put('/orders/:id/status', async (req, res) => {
 
   const db = getDb()
   try {
+    // 🔍 ดึงข้อมูลผู้ใช้ก่อนอัปเดตเพื่อส่งอีเมล
+    const orderInfoResult = await db.execute({
+      sql: `SELECT o.id, u.name as user_name, u.email as user_email 
+            FROM orders o JOIN users u ON o.user_id = u.id 
+            WHERE o.id = ?`,
+      args: [req.params.id]
+    })
+    const orderInfo = orderInfoResult.rows[0]
+
     // อัปเดตทั้งสถานะ และหมายเหตุการยกเลิก (ถ้าไม่มีให้ใส่ค่า null)
     await db.execute({
       sql: `UPDATE orders SET status = ?, cancel_reason = ?, updated_at = datetime('now') WHERE id = ?`,
       args: [status, cancel_reason || null, req.params.id]
     })
+
+    // 📧 ส่งอีเมลแจ้งเตือนสถานะใหม่
+    if (orderInfo) {
+      sendOrderStatusUpdateEmail(orderInfo.user_email, orderInfo.user_name, orderInfo.id, status)
+        .catch(err => console.error('Delayed Status Email Error:', err))
+    }
 
     let logMsg = `อัปเดตสถานะ order ${req.params.id} เป็น ${status}`
     if (status === 'cancelled' && cancel_reason) logMsg += ` (เหตุผล: ${cancel_reason})`
@@ -209,6 +226,7 @@ router.put('/orders/:id/status', async (req, res) => {
     console.error('Update status error:', err)
     res.status(500).json({ error: 'เกิดข้อผิดพลาด' })
   }
+
 })
 
 // ─── Delete Order [NEW] ───────────────────────────────────────────────────────

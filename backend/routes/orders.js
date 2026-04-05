@@ -2,6 +2,7 @@ const express = require('express')
 const { body, validationResult } = require('express-validator')
 const { getDb, logActivity } = require('../db')
 const { authenticate } = require('../middleware/auth')
+const { sendOrderConfirmationEmail } = require('../services/notifications')
 
 const router = express.Router()
 
@@ -48,6 +49,17 @@ router.post('/', authenticate, [
 
     await logActivity(req.user.id, 'ORDER_CREATED',
       `สั่งซื้อ ${fuelType} ${liters}L ราคา ${totalPrice.toFixed(2)} บาท`, req.ip)
+
+    // 📧 ส่งอีเมลยืนยันออเดอร์ (Premium E-Receipt)
+    // ส่งแบบ Background ไม่ต้องรอให้สร็จเพื่อความรวดเร็วของ Response
+    sendOrderConfirmationEmail(req.user.email, {
+      id: orderId,
+      fuel_type: fuelType,
+      liters: liters,
+      total_price: totalPrice,
+      delivery_address: deliveryAddress,
+      name: req.user.name
+    }).catch(err => console.error('Delayed Email Error:', err))
 
     res.status(201).json({ message: 'สั่งซื้อสำเร็จ!', orderId })
   } catch (err) {
