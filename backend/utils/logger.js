@@ -4,13 +4,8 @@ const path = require('path')
 const logDir = path.join(__dirname, '../logs')
 const logFile = path.join(logDir, 'error.log')
 
-// Create logs directory if it doesn't exist
-if (!fs.existsSync(logDir)) {
-  fs.mkdirSync(logDir, { recursive: true })
-}
-
 /**
- * Log an error to the error.log file
+ * Log an error to the error.log file or console
  * @param {Object} data - Information about the error
  */
 const logError = (data) => {
@@ -24,9 +19,24 @@ const logError = (data) => {
   ---
 `
   
-  fs.appendFile(logFile, logMessage, (err) => {
-    if (err) console.error('Failed to write to error log:', err)
-  })
+  // Console Logging (Always)
+  console.error(`🚨 [${data.type || 'SERVER'}] ${data.message}`)
+
+  try {
+    // Ensure directory exists (Safe check every time for production stability)
+    if (!fs.existsSync(logDir)) {
+      fs.mkdirSync(logDir, { recursive: true })
+    }
+    
+    fs.appendFile(logFile, logMessage, (err) => {
+      if (err) {
+        // If file logging fails, we already have it in console/stdout
+      }
+    })
+  } catch (err) {
+    // If filesystem is read-only (common on some Render tiers), just fail silently
+    // The error is already in the console/stdout which Render captures
+  }
 }
 
 module.exports = { logError }
